@@ -205,10 +205,15 @@
       <div class="form-group"><label>Month</label><input type="text" id="f_month" placeholder="e.g. April" oninput="updateSingle()"></div>
       <div class="form-group"><label>Year</label><input type="text" id="f_year" placeholder="e.g. 2026" oninput="updateSingle()"></div>
     </div>
-    <div class="form-group"><label>Name of KV</label><input type="text" id="f_kv" placeholder="e.g. KV NO. 1 CHHINDWARA" oninput="updateSingle()"></div>
+    <div class="form-group"><label>Name of KV</label><input type="text" id="f_kv" placeholder="e.g. KV No. 1 Jabalpur" oninput="updateSingle()"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Region (English)</label><input type="text" id="f_region_en" placeholder="e.g. JABALPUR" oninput="updateSingle()"></div>
+      <div class="form-group"><label>संभाग (Hindi)</label><input type="text" id="f_region_hi" placeholder="e.g. जबलपुर" oninput="updateSingle()"></div>
+    </div>
     <div class="form-group"><label>Name of Student</label><input type="text" id="f_student" placeholder="Full name" oninput="updateSingle()"></div>
     <div class="form-group"><label>Class &amp; Section</label><input type="text" id="f_class" placeholder="e.g. V - D" oninput="updateSingle()"></div>
-    <div class="form-group"><label>Traits Recognised &amp; Awarded</label><textarea id="f_traits" placeholder="Describe the traits..." oninput="updateSingle()"></textarea></div>
+    <div class="form-group"><label>Traits Recognised &amp; Awarded</label><textarea id="f_traits" placeholder="e.g. Excellent academic performer" oninput="updateSingle()"></textarea></div>
+    <div class="form-group"><label>Principal Name</label><input type="text" id="f_principal" placeholder="Principal's name" oninput="updateSingle()"></div>
     <div class="form-group"><label>VP / HM Name</label><input type="text" id="f_hm" placeholder="VP/HM name" oninput="updateSingle()"></div>
     <div class="form-group"><label>Class Teacher Name</label><input type="text" id="f_teacher" placeholder="Teacher's name" oninput="updateSingle()"></div>
     <button class="btn btn-red" onclick="printSingle()">🖨️ Print Certificate</button>
@@ -218,10 +223,9 @@
   <div class="panel" id="bulkPanel" style="display:none;">
     <h2>📊 Bulk Upload</h2>
     <button class="template-btn" onclick="downloadTemplate()">⬇️ Download Excel Template</button>
-    <div class="form-group"><label>VP / HM Name</label><input type="text" id="f_hm_bulk" placeholder="VP/HM name" oninput=""></div>
     <div class="info-box">
       <strong>Required columns in Excel:</strong>
-      Month, Year, KV_Name, Student_Name, Class_Section, Traits, Teacher_Name, VP_HM_Name
+      Month, Year, KV_Name, Region_EN, Region_HI, Student_Name, Class_Section, Traits, Teacher_Name, VP_HM_Name, Principal_Name
     </div>
     <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()"
       ondragover="event.preventDefault();this.classList.add('drag')"
@@ -264,7 +268,7 @@
               <div class="eng-title">KENDRIYA VIDYALAYA SANGATHAN</div>
               <div class="ministry-hindi">( शिक्षा मंत्रालय, भारत सरकार )</div>
               <div class="ministry-eng">( Ministry of Education, Govt. of India )</div>
-              <div class="region-line">जबलपुर संभाग / JABALPUR REGION</div>
+              <div class="region-line" id="c_region">जबलपुर संभाग / JABALPUR REGION</div>
             </div>
             <div class="header-logo-right"><img src="https://i.ibb.co/ksg3RR58/kvs-logo.png" alt="KVS"></div>
           </div>
@@ -296,7 +300,7 @@
             </div>
             <div class="sig-block">
               <div class="sig-space"></div>
-              <div class="sig-name">Mr. Hari Prasad Dharkar</div>
+              <div class="sig-name" id="c_principal"></div>
               <span>Principal</span>
             </div>
           </div>
@@ -312,7 +316,6 @@
 </div>
 
 <script>
-  const FIXED_PRINCIPAL = 'Mr. Hari Prasad Dharkar';
   let students = [], currentIdx = 0;
 
   function switchTab(tab) {
@@ -328,7 +331,12 @@
   }
 
   function updateSingle() {
-    const map = {f_month:'c_month',f_year:'c_year',f_kv:'c_kv',f_student:'c_student',f_class:'c_class',f_teacher:'c_teacher',f_hm:'c_hm'};
+    const map = {f_month:'c_month',f_year:'c_year',f_kv:'c_kv',f_student:'c_student',f_class:'c_class',f_teacher:'c_teacher',f_hm:'c_hm',f_principal:'c_principal'};
+    for (const [f,c] of Object.entries(map)) { const el=document.getElementById(c); if(el) el.textContent=document.getElementById(f)?.value.trim()||''; }
+    const hi = document.getElementById('f_region_hi')?.value.trim();
+    const en = document.getElementById('f_region_en')?.value.trim();
+    const rel = document.getElementById('c_region');
+    if(rel) rel.textContent = `${hi ? hi+' संभाग' : ''} / ${en ? en+' REGION' : ''}`;
     for (const [f,c] of Object.entries(map)) { const el=document.getElementById(c); if(el) el.textContent=document.getElementById(f)?.value.trim()||''; }
     const student = document.getElementById('f_student')?.value.trim()||'';
     const traits  = document.getElementById('f_traits')?.value.trim()||'';
@@ -339,10 +347,10 @@
   function downloadTemplate() {
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet([
-      ['Month','Year','KV_Name','Student_Name','Class_Section','Traits','Teacher_Name','VP_HM_Name'],
-      ['April','2026','KV NO. 1 CHHINDWARA','XYZ','V - D','Excellent academic performer','Mr. Yash Pratap Singh','Mr. S.K. Sahu']
+      ['Month','Year','KV_Name','Region_EN','Region_HI','Student_Name','Class_Section','Traits','Teacher_Name','VP_HM_Name','Principal_Name'],
+      ['April','2026','KV NO. 1 CHHINDWARA','JABALPUR REGION','जबलपुर संभाग','XYZ','V - D','Excellent academic performer','Mr. Yash Prtap Singh','Mr. S.K. Sahu','Mr. Hari Prasad Dharkar']
     ]);
-    ws['!cols'] = Array(7).fill({wch:24});
+    ws['!cols'] = Array(11).fill({wch:24});
     XLSX.utils.book_append_sheet(wb,ws,'Students');
     XLSX.writeFile(wb,'KVS_Certificate_Template.xlsx');
   }
@@ -355,7 +363,7 @@
     r.onload = e => {
       const wb = XLSX.read(e.target.result,{type:'binary'});
       const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});
-      students = rows.map(r=>({ month:String(r['Month']||''), year:String(r['Year']||''), kv:String(r['KV_Name']||''), student:String(r['Student_Name']||''), cls:String(r['Class_Section']||''), traits:String(r['Traits']||''), teacher:String(r['Teacher_Name']||''), hm:String(r['VP_HM_Name']||'') }));
+      students = rows.map(r=>({ month:String(r['Month']||''), year:String(r['Year']||''), kv:String(r['KV_Name']||''), region_en:String(r['Region_EN']||''), region_hi:String(r['Region_HI']||''), student:String(r['Student_Name']||''), cls:String(r['Class_Section']||''), traits:String(r['Traits']||''), teacher:String(r['Teacher_Name']||''), hm:String(r['VP_HM_Name']||''), principal:String(r['Principal_Name']||'') }));
       currentIdx=0; renderStudentList();
       if(students.length){ renderCertificate(students[0]); document.getElementById('bulkControls').style.display=''; updateNav(); }
     };
@@ -370,7 +378,11 @@
     c.innerHTML=''; c.appendChild(list);
   }
   function highlightStudent(i){ document.querySelectorAll('.student-item').forEach((el,j)=>el.classList.toggle('active',i===j)); }
-  function renderCertificate(s){ ['month','year','kv','student','cls','teacher','hm'].forEach(k=>{ const el=document.getElementById('c_'+(k==='cls'?'class':k)); if(el) el.textContent=s[k]; }); const tb=document.getElementById('c_traits'); if(tb) tb.innerHTML=traitHTML(s); }
+  function renderCertificate(s){
+    ['month','year','kv','student','cls','teacher','hm','principal'].forEach(k=>{ const el=document.getElementById('c_'+(k==='cls'?'class':k)); if(el) el.textContent=s[k]; });
+    const rel=document.getElementById('c_region'); if(rel) rel.textContent=`${s.region_hi ? s.region_hi+' संभाग' : ''} / ${s.region_en ? s.region_en+' REGION' : ''}`;
+    const tb=document.getElementById('c_traits'); if(tb) tb.innerHTML=traitHTML(s);
+  }
   function updateNav(){ document.getElementById('navInfo').textContent=`${currentIdx+1} / ${students.length}`; document.getElementById('prevBtn').disabled=currentIdx===0; document.getElementById('nextBtn').disabled=currentIdx===students.length-1; }
   function navigate(d){ currentIdx=Math.max(0,Math.min(students.length-1,currentIdx+d)); renderCertificate(students[currentIdx]); highlightStudent(currentIdx); updateNav(); }
 
@@ -390,7 +402,7 @@
             <div class="eng-title">KENDRIYA VIDYALAYA SANGATHAN</div>
             <div class="ministry-hindi">( शिक्षा मंत्रालय, भारत सरकार )</div>
             <div class="ministry-eng">( Ministry of Education, Govt. of India )</div>
-            <div class="region-line">जबलपुर संभाग / JABALPUR REGION</div>
+            <div class="region-line">${s.region_hi ? s.region_hi+' संभाग' : ''} / ${s.region_en ? s.region_en+' REGION' : ''}</div>
           </div>
           <div class="header-logo-right"><img src="https://i.ibb.co/ksg3RR58/kvs-logo.png" alt="KVS"></div>
         </div>
@@ -412,7 +424,7 @@
         <div class="sig-row">
           <div class="sig-block"><div class="sig-space"></div><div class="sig-name">${s.teacher}</div><span>Class Teacher</span></div>
           <div class="sig-block"><div class="sig-space"></div><div class="sig-name">${s.hm||''}</div><span>VP / H. M.</span></div>
-          <div class="sig-block"><div class="sig-space"></div><div class="sig-name">${FIXED_PRINCIPAL}</div><span>Principal</span></div>
+          <div class="sig-block"><div class="sig-space"></div><div class="sig-name">${s.principal||''}</div><span>Principal</span></div>
         </div>
       </div>
     </div>`;
@@ -426,7 +438,7 @@
   }
 
   function printSingle() {
-    doprint([certHTML({ month:document.getElementById('f_month').value.trim(), year:document.getElementById('f_year').value.trim(), kv:document.getElementById('f_kv').value.trim(), student:document.getElementById('f_student').value.trim(), cls:document.getElementById('f_class').value.trim(), traits:document.getElementById('f_traits').value.trim(), teacher:document.getElementById('f_teacher').value.trim(), hm:document.getElementById('f_hm').value.trim() })]);
+    doprint([certHTML({ month:document.getElementById('f_month').value.trim(), year:document.getElementById('f_year').value.trim(), kv:document.getElementById('f_kv').value.trim(), region_en:document.getElementById('f_region_en').value.trim(), region_hi:document.getElementById('f_region_hi').value.trim(), student:document.getElementById('f_student').value.trim(), cls:document.getElementById('f_class').value.trim(), traits:document.getElementById('f_traits').value.trim(), teacher:document.getElementById('f_teacher').value.trim(), hm:document.getElementById('f_hm').value.trim(), principal:document.getElementById('f_principal').value.trim() })]);
   }
   function printAll()     { doprint(students.map(certHTML)); }
   function printCurrent() { doprint([certHTML(students[currentIdx])]); }
